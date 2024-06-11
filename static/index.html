@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物搜索引擎</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <style>
+        /* 設定網頁整體樣式 */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* 標題樣式 */
+        h1 {
+            font-weight: 700;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        /* 搜索框樣式 */
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+        }
+
+        /* 搜索按鈕樣式 */
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4285f4;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* 搜索結果樣式 */
+        #results {
+            margin-top: 40px;
+            margin-left: 40px;
+            margin-right: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 95%;
+        }
+
+        #results>div {
+            flex: 0 0 25%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            #results>div {
+                flex: 0 0 48%;
+                margin-right: 4%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #results>div {
+                flex: 0 0 100%;
+                margin-right: 0;
+            }
+        }
+
+        /* 搜索結果標題樣式 */
+        #results h2 {
+            font-weight: 700;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* 搜索結果內文樣式 */
+        #results p {
+            margin: 0;
+        }
+
+        /* 價格樣式 */
+        #results .price {
+            color: red;
+        }
+
+        /* 圖片樣式 */
+        #results .image {
+            width: 20vw;
+        }
+
+        /* 連結樣式 */
+        #results a {
+            display: inline-block;
+            margin-top: 10px;
+            color: #4285f4;
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        // 送出search request
+        async function search() {
+            const query = document.getElementById("searchQuery").value;
+            const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const results = await response.json();
+                const resultsContainer = document.getElementById("results");
+                resultsContainer.innerHTML = "";
+
+                // 遍歷搜索結果並新增到頁面上
+                results.forEach(site => {
+                    const siteContainer = document.createElement("div");
+                    const siteHeader = document.createElement("h2");
+                    siteHeader.textContent = site.site;
+                    siteContainer.appendChild(siteHeader);
+
+                    site.items.forEach(item => {
+                        const itemContainer = document.createElement("div");
+                        const itemName = document.createElement("p");
+                        const itemImage = document.createElement("img");
+                        const itemPrice = document.createElement("p");
+                        const itemLink = document.createElement("a");
+
+                        itemImage.src = item.image;
+                        itemImage.alt = item.name;
+                        itemImage.classList.add("image");
+                        itemName.textContent = `${item.name}`;
+                        itemPrice.textContent = `Price: ${item.price}`;
+                        itemPrice.classList.add("price");
+                        itemLink.textContent = "Link";
+                        itemLink.href = item.link;
+                        itemLink.target = "_blank";
+
+                        itemContainer.appendChild(itemName);
+                        itemContainer.appendChild(itemImage);
+                        itemContainer.appendChild(itemPrice);
+                        itemContainer.appendChild(itemLink);
+                        siteContainer.appendChild(itemContainer);
+                    });
+
+                    resultsContainer.appendChild(siteContainer);
+                });
+            } else {
+                console.error('Error fetching data:', response.status, response.statusText);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>購物價格爬蟲</h1>
+        <input type="text" id="searchQuery" placeholder="輸入搜尋項目">
+        <button onclick="search()">搜尋</button>
+        <div id="results"></div>
+    </div>
+</body>
+
+</html>
